@@ -3,6 +3,9 @@
 #SBATCH --cpus-per-task=128
 ##SBATCH -t 00:01:00
 
+N = 1000000
+echo N > input.tmp
+srun "../seq_pr" < "input.tmp"
 
 for p in 1 4 8 16
     # BSPedupack programs read arguments from stdin, so we have to "pipe them in"
