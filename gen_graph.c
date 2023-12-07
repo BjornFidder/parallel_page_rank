@@ -59,14 +59,18 @@ long* gen_graph(long N, long n, long* start)
     return cols;
 }
 
+void outlinks_noZeroes(long n, long* D) 
+{
+    for (long i = 0; i < n; i++) 
+        if (D[i] == 0) D[i] = 1;
+}
+
 long* outlinks(long N, long n, long* cols, long* start) 
 { 
     long* D = vecalloci(N);
     initi(N, D, 0);
     for (long k = 0; k < start[n]; k++) 
         D[cols[k]]++;
-    for (long i = 0; i < N; i++) 
-        if (D[i] == 0) D[i] = 1;
     return D;
     // long outlinks;
     // for (long i = 0; i < N; i++) 

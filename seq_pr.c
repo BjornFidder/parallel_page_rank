@@ -88,16 +88,16 @@ long solve_pr(long N, long* cols, long* start, long* D)
     gen_rand_prob_vec(N, u);
     
     double* r = comp_residual(N, cols, start, D, u);
-    //print_vecs(N, u, r);
+    print_vecs(N, u, r);
 
     long count = 0;
-    while (norm_vec(N, r) >= 0.001)
+    while (norm_vec(N, r) >= pow(10, -12))
     { 
         iterate(N, cols, start, D, u, r);
         count++;
     }
     //printf("after %ld iterations: \n", count);
-    //print_vecs(N, u, r);
+    print_vecs(N, u, r);
     vecfreed(u);
     vecfreed(r);
 
@@ -112,7 +112,7 @@ int main(int argc, char **argv)
         printf("Please input a number\n");
     printf("Running PageRank algorithm with N = %ld\n", N);
 
-    //srand(31415);
+    // srand(31415);
     
     clock_t clock0, clock1, clock2;
 

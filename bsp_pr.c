@@ -157,7 +157,7 @@ void bsp_pr()
     bsp_sync();
     
     long* d = outlinks(N, n, cols, start); //local outlinks
-    
+
     //broadcast local outlinks
     for (long J = 0; J < N; J++)
         bsp_put(J%p, &d[J], ds, (J/p + s*n)*sizeof(long), sizeof(long));
@@ -172,6 +172,7 @@ void bsp_pr()
         for (long t = 0; t < p; t++)
             D[i] += ds[i + t*n];
     
+    outlinks_noZeroes(n, D);
     bsp_pop_reg(ds);
     vecfreei(ds);
     bsp_sync();
@@ -226,7 +227,7 @@ void bsp_pr()
     //Iterate
     long count = 0;
     double* GDr = vecallocd(n);
-    while (vec_total_norm(n, r, norms) >= 0.001)
+    while (vec_total_norm(n, r, norms) >= pow(10, -12))
         {
             add_vec(n, u, r);
             mul_GD(N, n, r, D, start, cols, Du, vals, GDr);
