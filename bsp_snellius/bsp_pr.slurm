@@ -3,7 +3,7 @@
 #SBATCH --cpus-per-task=128
 ##SBATCH -t 00:01:00
 
-N=100
+N=1000000
 echo $N > input.tmp
 srun "../seq_pr" < "input.tmp"
 wait
