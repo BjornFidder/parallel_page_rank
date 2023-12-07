@@ -8,4 +8,4 @@
 echo 100000 >> input.tmp
 
 # runs the sequential pagerank
-srun ../seq_pr < "input.tmp"
+srun "../seq_pr" < "input.tmp"

@@ -10,4 +10,4 @@ echo 4 > input.tmp
 echo 100000 >> input.tmp
 
 # runs the inner product (inprod) example using 4 processes
-srun ../bsp_pr < "input.tmp"
+srun "../bsp_pr" < "input.tmp"
