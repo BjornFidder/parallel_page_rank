@@ -5,7 +5,7 @@
 
 # BSPedupack programs read arguments from stdin, so we have to "pipe them in"
 # vector length
-echo 100000 >> input.tmp
+echo 1000000 >> input.tmp
 
 # runs the sequential pagerank
 srun "../seq_pr" < "input.tmp"

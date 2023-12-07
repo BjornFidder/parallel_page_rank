@@ -7,7 +7,7 @@
 # number of processor cores to use
 echo 4 > input.tmp
 # vector length
-echo 100000 >> input.tmp
+echo 1000000 >> input.tmp
 
 # runs the inner product (inprod) example using 4 processes
 srun "../bsp_pr" < "input.tmp"
