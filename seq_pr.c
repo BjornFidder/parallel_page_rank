@@ -107,8 +107,8 @@ int main(int argc, char **argv)
     long N;
     printf("Please enter N:\n");
     while (scanf("%ld", &N) != 1) 
-        printf("Please input a number");
-
+        printf("Please input a number\n");
+    printf("Running PageRank algorithm with N = %ld\n", N);
 
     //srand(31415);
     

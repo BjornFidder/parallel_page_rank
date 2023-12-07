@@ -130,7 +130,8 @@ void bsp_pr()
 
         printf("Please enter N:\n");
         while (scanf("%ld", &N) != 1) 
-            printf("Please input one number");
+            printf("Please input one number\n");
+        printf("Running PageRank algorithm for N = %ld\n", N);
     }
     bsp_push_reg(&N,sizeof(long));
     bsp_sync();
@@ -274,6 +275,7 @@ int main(int argc, char **argv)
         fflush(stdout);
         exit(EXIT_FAILURE);
     }
+    printf("Using %ld processors\n", P);
     bsp_pr();
     
     exit(EXIT_SUCCESS); 
