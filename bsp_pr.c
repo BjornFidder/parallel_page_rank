@@ -101,6 +101,7 @@ void print_vecs_pr(long n, double* u, double* r, bool print)
 
 void mul_GD(long N, long n, double* u, long* D, long* start, long* cols, double* Du, double* vals, double* v) 
 {
+
     //compute v = G*Dinv*u in parallel
     long p = bsp_nprocs();
 
@@ -115,6 +116,7 @@ void mul_GD(long N, long n, double* u, long* D, long* start, long* cols, double*
     for (int i = 0; i < n; i++)
         for (int k = start[i]; k < start[i+1]; k++)
             v[i] += vals[k];
+
 }
 
 void bsp_pr() 
@@ -129,7 +131,7 @@ void bsp_pr()
     if (s==0) {
 
         printf("Please enter N:\n");
-        while (scanf("%ld", &N) != 1) 
+        if (scanf("%ld", &N) != 1) 
             printf("Please input one number\n");
         printf("Running PageRank algorithm for N = %ld\n", N);
     }
@@ -140,7 +142,7 @@ void bsp_pr()
     bsp_sync();
     bsp_pop_reg(&N);
 
-    double t0, t1, t2;
+    double t0, t1, t2, t3;
     if (s == 0) t0 = bsp_time();
     ///////////////////
 
@@ -225,9 +227,15 @@ void bsp_pr()
     //print_vecs_pr(n, u, r, n <= 10);
 
     //Iterate
+    if (s==0) {t2 = bsp_time();}
     long count = 0;
     double* GDr = vecallocd(n);
-    while (vec_total_norm(n, r, norms) >= pow(10, -12))
+
+    double eps = pow(10, -12);
+    double expectedCount = log(eps / N) / log(q) / 2;
+    if (s == 0) printf("Expected %f iterations\n", expectedCount);
+
+    while ((count < 0.9 * expectedCount) | (vec_total_norm(n, r, norms) >= eps))
         {
             add_vec(n, u, r);
             mul_GD(N, n, r, D, start, cols, Du, vals, GDr);
@@ -240,13 +248,17 @@ void bsp_pr()
     
     bsp_sync();
     
-    if (s==0) t2 = bsp_time();
+    if (s==0) t3 = bsp_time();
 
     if (s == 0) printf("After %ld iterations:\n", count);
     //print_vecs_pr(n, u, r, n <= 10);   
 
     if (s == 0) {printf("Generation run-time: %f\n", t1-t0);
-        printf("Solving run-time: %f\n", t2 - t1);}
+        printf("Solving run-time: %f\n", t3 - t1);
+        printf("Time per iteration: %f\n", (t3 - t2) / count);
+        printf("\n");}
+
+    
 
     bsp_pop_reg(Du);
     bsp_pop_reg(norms);

@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-double p = 0.85;
+double q = 0.85;
 
 double* mul_mat_vec(long N, long* cols, long* start, double* x) 
 {
@@ -19,14 +19,14 @@ double* mul_mat_vec(long N, long* cols, long* start, double* x)
 
 double* comp_residual(long N, long* cols, long* start, long* D, double* u) 
 {
-    //Compute the residual according to r0 = e - (I - pGD^{-1})u0
+    //Compute the residual according to r0 = e - (I - qGD^{-1})u0
     double* r = vecallocd(N);
 
     double* Du = div_vec(N, u, D);
     double* GDu = mul_mat_vec(N, cols, start, Du);
     vecfreed(Du);
     for (long i = 0; i < N; i++)
-        r[i] = 1 - u[i] + p*GDu[i];
+        r[i] = 1 - u[i] + q*GDu[i];
     vecfreed(GDu);
     return r;
 }
@@ -37,7 +37,7 @@ void iterate(long N, long* cols, long* start, long* D, double* u, double* r)
     double* Dr = div_vec(N, r, D);
     double* GDr = mul_mat_vec(N, cols, start, Dr);
     vecfreed(Dr);
-    for (long i = 0; i < N; i++) r[i] = p*GDr[i];
+    for (long i = 0; i < N; i++) r[i] = q*GDr[i];
     vecfreed(GDr);
 }
 
@@ -72,7 +72,7 @@ void print_vecs(long N, double* u, double* r)
     printf("r: ");
     if (N<=10) print_vec(N, r);
 
-    printf("squared norm: %f\n", norm_vec(N,r));
+    printf("norm: %f\n", sqrt(norm_vec(N,r)));
 
 }
 
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 {
     long N;
     printf("Please enter N:\n");
-    while (scanf("%ld", &N) != 1) 
+    if (scanf("%ld", &N) != 1) 
         printf("Please input a number\n");
     printf("Running PageRank algorithm with N = %ld\n", N);
 
@@ -142,5 +142,7 @@ int main(int argc, char **argv)
     printf("After %ld iterations\n", count);
     printf("Generation run-time: %f\n", gen_time);
     printf("Solving run-time: %f\n", solve_time);
+    printf("Time per iteration: %f\n", solve_time / count);
+    printf("\n");
 
 }
