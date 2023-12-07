@@ -76,7 +76,7 @@ void print_vecs(long N, double* u, double* r)
 
 }
 
-void solve_pr(long N, long* cols, long* start, long* D)
+long solve_pr(long N, long* cols, long* start, long* D)
 {
     //solve the PageRank problem (I - pGD^{-1})u = e iteratively
     //N is the system size
@@ -100,6 +100,8 @@ void solve_pr(long N, long* cols, long* start, long* D)
     //print_vecs(N, u, r);
     vecfreed(u);
     vecfreed(r);
+
+    return count;
 }
 
 int main(int argc, char **argv) 
@@ -128,7 +130,7 @@ int main(int argc, char **argv)
     // print_graph(N, cols, start);
     // print_D(N, D);
 
-    solve_pr(N, cols, start, D);
+    long count = solve_pr(N, cols, start, D);
 
     vecfreei(cols);
     vecfreei(start);
@@ -137,6 +139,7 @@ int main(int argc, char **argv)
     clock2 = clock();
     double solve_time = (double)(clock2 - clock1) / CLOCKS_PER_SEC;
 
+    printf("After %ld iterations\n", count);
     printf("Generation run-time: %f\n", gen_time);
     printf("Solving run-time: %f\n", solve_time);
 
