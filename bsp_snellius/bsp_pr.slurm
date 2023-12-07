@@ -3,7 +3,7 @@
 #SBATCH --cpus-per-task=128
 ##SBATCH -t 00:01:00
 
-N = 1000000
+N = 100
 echo N > input.tmp
 srun "../seq_pr" < "input.tmp"
 
@@ -13,7 +13,7 @@ do
     # number of processor cores to use
     echo p > input.tmp
     # vector length
-    echo 1000000 >> input.tmp
+    echo N >> input.tmp
 
     # runs the inner product (inprod) example using 4 processes
     srun "../bsp_pr" < "input.tmp"
