@@ -88,7 +88,7 @@ long solve_pr(long N, long* cols, long* start, long* D)
     gen_rand_prob_vec(N, u);
     
     double* r = comp_residual(N, cols, start, D, u);
-    print_vecs(N, u, r);
+    //print_vecs(N, u, r);
 
     long count = 0;
     while (norm_vec(N, r) >= pow(10, -12))
@@ -97,7 +97,7 @@ long solve_pr(long N, long* cols, long* start, long* D)
         count++;
     }
     //printf("after %ld iterations: \n", count);
-    print_vecs(N, u, r);
+    //print_vecs(N, u, r);
     vecfreed(u);
     vecfreed(r);
 
