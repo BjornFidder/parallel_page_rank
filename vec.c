@@ -58,6 +58,14 @@ void initi(long N, long* x, long a)
     }
 }
 
+void initb(long N, bool* x, bool a) 
+{
+    for (long i = 0; i < N; i++) 
+    {
+        x[i] = a;
+    }
+}
+
 void initd(long N, double* x, double a) 
 {
     for (long i = 0; i < N; i++) 
