@@ -108,14 +108,28 @@ void mul_GD(long N, long n, double* u, long* D, long* start, long* cols, double*
     initd(n, v, 0);
     div_vec_pr(n, u, D, Du);
 
-    for (int i = 0; i < n; i++)
-        for (int k = start[i]; k < start[i+1]; k++)
-            bsp_get(cols[k] % p, Du, cols[k]/p * sizeof(double), &vals[k], sizeof(double));
     bsp_sync();
-    
+
+    // for (int i = 0; i < n; i++)
+    //     for (int k = start[i]; k < start[i+1]; k++)
+    //             bsp_get(cols[k] % p, Du, cols[k]/p * sizeof(double), &vals[k], sizeof(double));
+    // bsp_sync();
+
+    bool* cols_get = vecallocb(N);
+    initb(N, cols_get, false);
     for (int i = 0; i < n; i++)
         for (int k = start[i]; k < start[i+1]; k++)
-            v[i] += vals[k];
+            cols_get[cols[k]] = true;
+    
+    for (int j = 0; j < N; j++)
+        if (cols_get[j]) bsp_get(j % p, Du, j/p * sizeof(double), &vals[j], sizeof(double));
+
+    bsp_sync();
+    vecfreeb(cols_get);
+
+    for (int i = 0; i < n; i++)
+        for (int k = start[i]; k < start[i+1]; k++)
+            {v[i] += vals[cols[k]];}
 
 }
 
@@ -203,12 +217,11 @@ void bsp_pr()
     for (long i = 0; i < n; i++)
         u[i] /= sum;
 
-
     // Allocations
     double* Du = vecallocd(n);
     bsp_push_reg(Du, n*sizeof(double));
 
-    double* vals = vecallocd(start[n]*sizeof(double));
+    double* vals = vecallocd(N*sizeof(double));
 
     double* norms = vecallocd(p);
     bsp_push_reg(norms, p*sizeof(double));
@@ -281,8 +294,7 @@ int main(int argc, char **argv)
     printf("How many processors do you want to use?\n");
     fflush(stdout);
 
-    scanf("%ld",&P);
-    if (P > bsp_nprocs()){
+    if ((scanf("%ld",&P) == 0) || (P > bsp_nprocs())){
         printf("Sorry, only %u processors available.\n",
                 bsp_nprocs());
         fflush(stdout);

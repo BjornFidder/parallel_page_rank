@@ -8,7 +8,7 @@ echo $N > input.tmp
 srun "../seq_pr" < "input.tmp"
 wait
 
-for p in 1 4 8 16
+for p in 1 4 8 16 32 64
 do
     # BSPedupack programs read arguments from stdin, so we have to "pipe them in"
     # number of processor cores to use
