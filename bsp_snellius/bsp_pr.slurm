@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=128
-##SBATCH -t 00:01:00
+##SBATCH -t 00:02:00
 
 N=1000000
 echo $N > input.tmp
