@@ -17,7 +17,7 @@ double* mul_mat_vec(long N, long* cols, long* start, double* x)
     return y;
 }
 
-double* comp_residual(long N, long* cols, long* start, long* D, double* u) 
+double* comp_residual(long N, long* cols, long* start, uint8_t* D, double* u) 
 {
     //Compute the residual according to r0 = e - (I - qGD^{-1})u0
     double* r = vecallocd(N);
@@ -31,7 +31,7 @@ double* comp_residual(long N, long* cols, long* start, long* D, double* u)
     return r;
 }
 
-void iterate(long N, long* cols, long* start, long* D, double* u, double* r)
+void iterate(long N, long* cols, long* start, uint8_t* D, double* u, double* r)
 {
     add_vec(N, u, r);
     double* Dr = div_vec(N, r, D);
@@ -41,7 +41,7 @@ void iterate(long N, long* cols, long* start, long* D, double* u, double* r)
     vecfreed(GDr);
 }
 
-// void test_u(long N, long* cols, long* start, long* D, double* u) 
+// void test_u(long N, long* cols, long* start, uint8_t* D, double* u) 
 // {
 //     double* e = vecallocd(N);
 
@@ -76,7 +76,7 @@ void print_vecs(long N, double* u, double* r)
 
 }
 
-long solve_pr(long N, long* cols, long* start, long* D)
+long solve_pr(long N, long* cols, long* start, uint8_t* D)
 {
     //solve the PageRank problem (I - pGD^{-1})u = e iteratively
     //N is the system size
@@ -88,7 +88,7 @@ long solve_pr(long N, long* cols, long* start, long* D)
     gen_rand_prob_vec(N, u);
     
     double* r = comp_residual(N, cols, start, D, u);
-    //print_vecs(N, u, r);
+    if (N <= 10) print_vecs(N, u, r);
 
     long count = 0;
     while (norm_vec(N, r) >= pow(10, -12))
@@ -97,7 +97,7 @@ long solve_pr(long N, long* cols, long* start, long* D)
         count++;
     }
     //printf("after %ld iterations: \n", count);
-    //print_vecs(N, u, r);
+    if (N <= 10) print_vecs(N, u, r);
     vecfreed(u);
     vecfreed(r);
 
@@ -114,7 +114,7 @@ int main(int argc, char **argv)
 
     // srand(31415);
     
-    clock_t clock0, clock1, clock2;
+    clock_t clock0, clock1, clock2, clock3;
 
     clock0 = clock();
 
@@ -122,27 +122,30 @@ int main(int argc, char **argv)
     long* start;
     start = vecalloci(N+1); 
     long* cols = gen_graph(N, N, start);
-    long* D  = outlinks(N, N, cols, start);
-    
     clock1 = clock();
-    double gen_time = (double)(clock1 - clock0) / CLOCKS_PER_SEC;
+    uint8_t* D  = outlinks(N, N, cols, start);
+    
+    clock2 = clock();
 
-    // print_graph(N, cols, start);
-    // print_D(N, D);
+    if (N <= 10) 
+        {print_graph(N, cols, start);
+        print_D(N, D);}
 
     long count = solve_pr(N, cols, start, D);
 
     vecfreei(cols);
     vecfreei(start);
-    vecfreei(D);
+    vecfreei8(D);
 
-    clock2 = clock();
-    double solve_time = (double)(clock2 - clock1) / CLOCKS_PER_SEC;
+    clock3 = clock();
+    double gen_time = (double)(clock2 - clock0) / CLOCKS_PER_SEC;
+    double outlink_time = (double)(clock2 - clock1) / CLOCKS_PER_SEC;
+    double solve_time = (double)(clock3 - clock2) / CLOCKS_PER_SEC;
 
     printf("After %ld iterations\n", count);
     printf("Generation run-time: %f\n", gen_time);
+    printf("Finding outlinks: %f\n", outlink_time);
     printf("Solving run-time: %f\n", solve_time);
     printf("Time per iteration: %f\n", solve_time / count);
     printf("\n");
-
 }

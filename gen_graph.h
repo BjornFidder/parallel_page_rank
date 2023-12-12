@@ -6,6 +6,6 @@
 long rand_long(long N);
 long* gen_graph(long N, long n, long* start);
 void print_graph(long N, long* cols, long* start);
-void print_D(long N, long* D);
-long* outlinks(long N, long n, long* cols, long* start);
-void outlinks_noZeroes(long n, long* D);
+void print_D(long N, uint8_t* D);
+uint8_t* outlinks(long N, long n, long* cols, long* start);
+void outlinks_noZeroes(long n, uint8_t* D);

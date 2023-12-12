@@ -36,6 +36,7 @@ typedef struct item {
 long nloc(long p, long s, long n);
 
 long *vecalloci(size_t n);
+uint8_t *vecalloci8(size_t n);
 bool *vecallocb(size_t n);
 double *vecallocd(size_t n);
 double complex *vecallocc(size_t n);
@@ -43,6 +44,7 @@ Item *vecallocitem(size_t n);
 double **matallocd(size_t m, size_t n);
 
 void vecfreei(long *pi);
+void vecfreei8(uint8_t *pi8);
 void vecfreeb(bool *pb);
 void vecfreed(double *pd);
 void vecfreec(double complex *pc);

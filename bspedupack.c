@@ -29,6 +29,18 @@ long *vecalloci(size_t n){
 
 } /* end vecalloci */
 
+uint8_t *vecalloci8(size_t n){
+    /* This function allocates a vector of 8 bit unsigned
+       integers of length n */
+    uint8_t *pi8;
+
+    pi8= malloc(MAX(n,1)*sizeof(uint8_t));
+    if (pi8==NULL)
+        bsp_abort("vecalloci: not enough memory");
+    return pi8;
+
+} /* end vecalloci8 */
+
 
 bool *vecallocb(size_t n){
     /* This function allocates a vector of booleans of length n */
@@ -103,6 +115,13 @@ void vecfreei(long *pi){
         free(pi);
 
 } /* end vecfreei */
+
+void vecfreei8(uint8_t* pi8) 
+{
+    /* This function frees a vector of 8 bit unsigned integers */
+    if (pi8!=NULL)
+        free(pi8);
+}/* end vecfreei8 */
 
 void vecfreeb(bool *pb){
     /* This function frees a vector of booleans */

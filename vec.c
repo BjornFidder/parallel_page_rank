@@ -40,7 +40,7 @@ void add_vec(long N, double* x, double* y)
         x[i] = x[i]+y[i];
 }
 
-double* div_vec(long N, double* x, long* y) 
+double* div_vec(long N, double* x, uint8_t* y) 
 {
     //divide vector x by vector y
     //giving the output in vector z
@@ -51,6 +51,14 @@ double* div_vec(long N, double* x, long* y)
 }
 
 void initi(long N, long* x, long a) 
+{
+    for (long i = 0; i < N; i++) 
+    {
+        x[i] = a;
+    }
+}
+
+void initi8(long N, uint8_t* x, uint8_t a) 
 {
     for (long i = 0; i < N; i++) 
     {

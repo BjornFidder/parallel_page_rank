@@ -1,25 +1,7 @@
 #include "gen_graph.h"
-#include "bsp_gen_graph.h"
 
 long P;
 double q = 0.85;
-
-// long phi(long J, long p, long N) 
-// {   
-//     return J % p;
-// }
-
-// long j2J(long j, long s, long p, long N)
-// {
-//     //convert local index j on processor s to global index J
-//     return s + j*p;
-// }
-
-// long J2j(long J, long p, long N) 
-// {
-//     //convert global index J to local index j
-//     return J / p;
-// }
 
 double vec_total_norm(long n, double* x, double* norms)
 {
@@ -52,7 +34,7 @@ double gen_rand_vec(long n, double* u)
     return sum;
 }
 
-void div_vec_pr(long n, double* x, long* y, double* z) 
+void div_vec_pr(long n, double* x, uint8_t* y, double* z) 
 {
     //divide vector x by vector y
     //giving the output in vector z
@@ -61,7 +43,7 @@ void div_vec_pr(long n, double* x, long* y, double* z)
 }
 
 
-void print_graphs(long n, long* D, long* start, long* cols)
+void print_graphs(long n, uint8_t* D, long* start, long* cols)
 {
     long p = bsp_nprocs();
     long s = bsp_pid();
@@ -99,33 +81,108 @@ void print_vecs_pr(long n, double* u, double* r, bool print)
     } 
 }
 
-void mul_GD(long N, long n, double* u, long* D, long* start, long* cols, double* Du, double* vals, double* v) 
+uint8_t* outlinks_pr(long N, long n, long* cols, long* start) 
 {
+    long p = bsp_nprocs();
+    long s = bsp_pid();
 
+    //compute local outlinks
+    uint8_t* ds = vecalloci8(n*p);
+    initi8(n*p,ds,0);
+    bsp_push_reg(ds, n*p*sizeof(uint8_t));
+    bsp_sync();
+    
+    uint8_t* d = outlinks(N, n, cols, start); //local outlinks
+
+    // 'put' local outlinks in local ds
+    for (long j = 0; j < N; j++)
+        ds[j/p+s*n] = d[j];
+
+    //broadcast local outlinks
+    long t;
+    for (long j = 0; j < N; j++)
+    {
+        t = j%p;
+        if (t != s && d[j] > 0) 
+            bsp_put(t, &d[j], ds, (j/p + s*nloc(p, t, N))*sizeof(uint8_t), sizeof(uint8_t));
+    }
+    free(d);
+    bsp_sync();
+    
+    //compute total outlinks for local rows
+    uint8_t* D = vecalloci8(n);
+    initi8(n, D, 0);
+    for (long i = 0; i < n; i++) 
+        for (long t = 0; t < p; t++)
+            D[i] += ds[i+n*t];
+
+    outlinks_noZeroes(n, D);
+    bsp_pop_reg(ds);
+    free(ds);
+
+    return D;
+}
+
+double* initial_vector(long N, long n) 
+{
+    long p = bsp_nprocs();
+    long s = bsp_pid();
+    
+    //  Generate random initial vector u0 //
+    //register
+    double* sums = vecallocd(p);
+    bsp_push_reg(sums, p*sizeof(double));
+    bsp_sync();
+
+    //generate and distribute sum to all processors
+    double* u = vecallocd(n);
+    double sum = gen_rand_vec(n, u);
+    for (long t = 0; t < p; t++)
+        bsp_put(t, &sum, sums, s*sizeof(double), sizeof(double));
+    bsp_sync();
+
+    //compute total sum and normalize local components
+    sum = 0;
+    for (long t = 0; t < p; t++)
+        sum += sums[t];
+    bsp_pop_reg(sums);
+    vecfreed(sums);
+    for (long i = 0; i < n; i++)
+        u[i] /= sum;
+
+    return u;
+}
+
+
+void mul_GD(long N, long n, double* u, uint8_t* D, long* start, long* cols, bool* cols_get, double* Du, double* vals, double* v) 
+{
     //compute v = G*Dinv*u in parallel
     long p = bsp_nprocs();
+    long s = bsp_pid();
 
     initd(n, v, 0);
     div_vec_pr(n, u, D, Du);
 
     bsp_sync();
 
+    //Slow method:
     // for (int i = 0; i < n; i++)
     //     for (int k = start[i]; k < start[i+1]; k++)
     //             bsp_get(cols[k] % p, Du, cols[k]/p * sizeof(double), &vals[k], sizeof(double));
     // bsp_sync();
+    // for (int i = 0; i < n; i++)
+    //     for (int k = start[i]; k < start[i+1]; k++)
+    //         v[i] += vals[k];
 
-    bool* cols_get = vecallocb(N);
-    initb(N, cols_get, false);
+    // 'Get' values from this processor
     for (int i = 0; i < n; i++)
-        for (int k = start[i]; k < start[i+1]; k++)
-            cols_get[cols[k]] = true;
-    
+        vals[s*p+i] = Du[i];
+
+    // //Determine which components of v to get from other processors
     for (int j = 0; j < N; j++)
         if (cols_get[j]) bsp_get(j % p, Du, j/p * sizeof(double), &vals[j], sizeof(double));
 
     bsp_sync();
-    vecfreeb(cols_get);
 
     for (int i = 0; i < n; i++)
         for (int k = start[i]; k < start[i+1]; k++)
@@ -156,66 +213,29 @@ void bsp_pr()
     bsp_sync();
     bsp_pop_reg(&N);
 
-    double t0, t1, t2, t3;
-    if (s == 0) t0 = bsp_time();
+    double tg0, tg1, tD0, ts0, ts1;
+    if (s == 0) tg0 = bsp_time();
     ///////////////////
 
     //Distribute the rows cyclically
     long n = nloc(p, s, N);
 
+    //Generation graph
     long* start; 
     start = vecalloci(n+1);
     long* cols = gen_graph(N, n, start);
-
-    ////compute local outlinks
-    long* ds = vecalloci(n*p);
-    bsp_push_reg(ds, n*p*sizeof(long));
+ 
+    //Outlinks
     bsp_sync();
+    if (s == 0) tD0 = bsp_time(); 
+    uint8_t* D = outlinks_pr(N, n, cols, start);
+    bsp_sync();
+    if (s==0) {tg1 = bsp_time();}
     
-    long* d = outlinks(N, n, cols, start); //local outlinks
-
-    //broadcast local outlinks
-    for (long J = 0; J < N; J++)
-        bsp_put(J%p, &d[J], ds, (J/p + s*n)*sizeof(long), sizeof(long));
-       
-    vecfreei(d);
-    bsp_sync();
+    if (N <= 10) print_graphs(n, D, start, cols);
     
-    //compute total outlinks for local rows
-    long* D = vecalloci(n);
-    initi(n, D, 0);
-    for (long i = 0; i < n; i++) 
-        for (long t = 0; t < p; t++)
-            D[i] += ds[i + t*n];
-    
-    outlinks_noZeroes(n, D);
-    bsp_pop_reg(ds);
-    vecfreei(ds);
-    bsp_sync();
-
-    if (s==0) {t1 = bsp_time();}
-    
-    //  Generate random initial vector u0 //
-    //register
-    double* sums = vecallocd(p);
-    bsp_push_reg(sums, p*sizeof(double));
-    bsp_sync();
-
-    //generate and distribute sum to all processors
-    double* u = vecallocd(n);
-    double sum = gen_rand_vec(n, u);
-    for (long t = 0; t < p; t++)
-        bsp_put(t, &sum, sums, s*sizeof(double), sizeof(double));
-    bsp_sync();
-
-    //compute total sum and normalize local components
-    sum = 0;
-    for (long t = 0; t < p; t++)
-        sum += sums[t];
-    bsp_pop_reg(sums);
-    vecfreed(sums);
-    for (long i = 0; i < n; i++)
-        u[i] /= sum;
+    //Initial vector
+    double* u = initial_vector(N, n);
 
     // Allocations
     double* Du = vecallocd(n);
@@ -228,10 +248,17 @@ void bsp_pr()
 
     bsp_sync();
 
+    //Determine which columns to get when multiplying with G
+    bool* cols_get = vecallocb(N);
+    initb(N, cols_get, false);
+    for (int i = 0; i < n; i++)
+        for (int k = start[i]; k < start[i+1]; k++)
+            if (cols[k] % p != s) cols_get[cols[k]] = true;//(cols[k] % p != s) cols_get[cols[k]] = false;
+    
     //Find r0
     double* r = vecallocd(n);
     double* GDu = vecallocd(n);
-    mul_GD(N, n, u, D, start, cols, Du, vals, GDu);
+    mul_GD(N, n, u, D, start, cols, cols_get, Du, vals, GDu);
     for (int i = 0; i < n; i++)
         r[i] = 1 - u[i] + q*GDu[i];
     bsp_sync();
@@ -240,7 +267,7 @@ void bsp_pr()
     //print_vecs_pr(n, u, r, n <= 10);
 
     //Iterate
-    if (s==0) {t2 = bsp_time();}
+    if (s==0) {ts0 = bsp_time();}
     long count = 0;
     double* GDr = vecallocd(n);
 
@@ -248,10 +275,10 @@ void bsp_pr()
     double expectedCount = log(eps / N) / log(q) / 2;
     if (s == 0) printf("Expected %f iterations\n", expectedCount);
 
-    while ((count < 0.9 * expectedCount) | (vec_total_norm(n, r, norms) >= eps))
+    while ((count < 0.95 * expectedCount) | (vec_total_norm(n, r, norms) >= eps))
         {
             add_vec(n, u, r);
-            mul_GD(N, n, r, D, start, cols, Du, vals, GDr);
+            mul_GD(N, n, r, D, start, cols, cols_get, Du, vals, GDr);
             for (int i = 0; i < n; i++) r[i] = q*GDr[i];
             count++;
             bsp_sync();
@@ -261,29 +288,22 @@ void bsp_pr()
     
     bsp_sync();
     
-    if (s==0) t3 = bsp_time();
+    if (s==0) ts1 = bsp_time();
 
     if (s == 0) printf("After %ld iterations:\n", count);
     //print_vecs_pr(n, u, r, n <= 10);   
 
-    if (s == 0) {printf("Generation run-time: %f\n", t1-t0);
-        printf("Solving run-time: %f\n", t3 - t1);
-        printf("Time per iteration: %f\n", (t3 - t2) / count);
+    if (s == 0) {printf("Generation run-time: %f\n", tg1-tg0);
+        printf("Finding outlinks: %f\n", tg1-tD0);
+        printf("Solving run-time: %f\n", ts1 - tg1);
+        printf("Time per iteration: %f\n", (ts1 - ts0) / count);
         printf("\n");}
-
     
-
-    bsp_pop_reg(Du);
-    bsp_pop_reg(norms);
-    vecfreei(start);
-    vecfreei(cols);
-    vecfreei(D);
-    vecfreed(u);
-    vecfreed(r);
-    vecfreed(Du);
-    vecfreed(norms);
-    vecfreed(vals);
-    vecfreed(GDr);
+    //Pop registries and free
+    bsp_pop_reg(Du); bsp_pop_reg(norms);
+    vecfreei(start); vecfreei(cols); vecfreei8(D);
+    vecfreed(u); vecfreed(r); vecfreed(Du); vecfreed(norms);
+    vecfreed(vals); vecfreed(GDr); vecfreeb(cols_get);
 }
 
 int main(int argc, char **argv) 
