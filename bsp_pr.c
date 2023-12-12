@@ -300,6 +300,7 @@ void bsp_pr()
         printf("Finding outlinks: %f\n", tg1-tD0);
         printf("Solving run-time: %f\n", ts1 - tg1);
         printf("Time per iteration: %f\n", (ts1 - ts0) / count);
+        printf("Total run-time: %f\n", (ts1 - tg0));
         printf("\n");}
     
     //Pop registries and free
