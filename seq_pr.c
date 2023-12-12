@@ -144,7 +144,7 @@ int main(int argc, char **argv)
     double solve_time = (double)(clock3 - clock2) / CLOCKS_PER_SEC;
     double total_time = (double)(clock3 - clock0) / CLOCKS_PER_SEC;
 
-    printf("After %ld iterations\n", count);
+    printf("Needed %ld iterations\n", count);
     printf("Generation run-time: %f\n", gen_time);
     printf("Finding outlinks: %f\n", outlink_time);
     printf("Solving run-time: %f\n", solve_time);

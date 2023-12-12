@@ -51,8 +51,8 @@ void outlinks_noZeroes(long n, uint8_t* D)
 
 uint8_t* outlinks(long N, long n, long* cols, long* start) 
 { 
-    uint8_t* D = calloc(N, sizeof(uint8_t));
-    //initi(N, D, 0);
+    uint8_t* D = vecalloci8(N);
+    initi8(N, D, 0);
     for (long k = 0; k < start[n]; k++) 
         D[cols[k]]++;
     return D;

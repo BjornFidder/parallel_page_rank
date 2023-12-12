@@ -29,11 +29,11 @@ void gen_rand_prob_vec(long N, double* u, unsigned int* seed)
         u[i] /= sum;
 }
 
-double norm_vec(long N, double* x) 
+double norm_vec(long n, double* x) 
 {
     //compute the squared norm of a vector x of size N
     double norm = 0;
-    for (long i = 0; i < N; i++)
+    for (long i = 0; i < n; i++)
         norm += x[i]*x[i];
     return norm;
 }
