@@ -1,14 +1,14 @@
 
 #include "vec.h"
 
-int rand_r(unsigned *seedp) {
-    *seedp = *seedp * 1103515245 + 12345;
-    return((unsigned)(*seedp/65536) % 32768);
-}
+// long rand_r(unsigned int *seed) {
+//     *seed = *seed * 1103515245 + 12345;
+//     return (long)((unsigned int)(*seed/(RAND_MAX)) % (RAND_MAX/2+1));
+// }   
 
 long rand_long(long N, unsigned int* seed) 
 {
-    return (long)rand_r(seed) % N;
+    return rand_r(seed) % N;
 }
 
 void print_vec(long N, double* x) 
