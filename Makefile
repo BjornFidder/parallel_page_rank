@@ -15,3 +15,5 @@ bsp: $(OBJGEN)
 
 bench: $(OBJBEN)
 	bspcc $(CFLAGS) -o bench $(OBJBEN) $(LFLAGS)
+
+all: seq bsp bench

@@ -16,7 +16,6 @@ do
     # vector length
     echo $N >> input.tmp
 
-    # runs the inner product (inprod) example using 4 processes
     srun "../bsp_pr" < "input.tmp"
     wait
 done
