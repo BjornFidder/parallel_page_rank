@@ -2,9 +2,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+// #include "mtwist.c"
 
+long rand_long(long N, unsigned int* seed);
 void print_vec(long N, double* x);
-void gen_rand_prob_vec(long N, double* u);
+void gen_rand_prob_vec(long N, double* u, unsigned int* seed);
 double norm_vec(long N, double* x);
 void add_vec(long N, double* x, double* y);
 double* div_vec(long N, double* x, uint8_t* y);

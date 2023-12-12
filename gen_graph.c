@@ -6,15 +6,11 @@ long min(long a, long b)
     else return b;
 }
 
-long rand_long(long N) {
-    return (long)rand() % N;
-}
-
 int cmp_long(const void * a, const void * b) {
    return ( *(int*)a - *(int*)b );
 }
 
-void gen_nlinks(long N, long n, long* start)
+void gen_nlinks(long N, long n, long* start, unsigned int* seed)
 {
     //for each row, determine a random number between 1 and min(N,10), which
     //is the number of links to that node, which determines the start array
@@ -22,17 +18,17 @@ void gen_nlinks(long N, long n, long* start)
     long maxlinks = min(N, 10);
     start[0] = 0;
     for (long i = 1; i <= n; i++) 
-        start[i] = start[i-1] + rand_long(maxlinks)+1;
+        start[i] = start[i-1] + rand_long(maxlinks, seed)+1;
 }
 
-void gen_cols(long N, long n, long* cols, long* start) 
+void gen_cols(long N, long n, long* cols, long* start, unsigned int* seed) 
 {
     //choose random values for the columns
     for (long k = 0; k < start[n]; k++) 
-        cols[k] = rand_long(N);
+        cols[k] = rand_long(N, seed);
 }
     
-long* gen_graph(long N, long n, long* start) 
+long* gen_graph(long N, long n, long* start, unsigned int* seed) 
 {
     //Generate a graph with a random number of inlinks between 1 and N,
     //store the (nxN) adjacency matrix in CRS format: 
@@ -40,9 +36,9 @@ long* gen_graph(long N, long n, long* start)
     //and let start specify the indexes where the rows start.
     //start should be allocated (n+1) longs
 
-    gen_nlinks(N, n, start);
+    gen_nlinks(N, n, start, seed);
     long* cols = vecalloci(start[n]);
-    gen_cols(N, n, cols, start);
+    gen_cols(N, n, cols, start, seed);
 
     return cols;
 }

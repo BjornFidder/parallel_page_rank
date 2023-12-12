@@ -22,13 +22,13 @@ double vec_total_norm(long n, double* x, double* norms)
     return norm;
 }
 
-double gen_rand_vec(long n, double* u) 
+double gen_rand_vec(long n, double* u, unsigned int* seed) 
 {
     //Generate n random vector components and return the sum
     double sum = 0;
     for (long i = 0; i<n; i++)
     {
-        u[i] = (double)(rand() % (RAND_MAX / n));
+        u[i] = (double)rand_long(RAND_MAX/(n*10), seed);
         sum += u[i];
     }
     return sum;
@@ -123,7 +123,7 @@ uint8_t* outlinks_pr(long N, long n, long* cols, long* start)
     return D;
 }
 
-double* initial_vector(long N, long n) 
+double* initial_vector(long N, long n, unsigned int* seed) 
 {
     long p = bsp_nprocs();
     long s = bsp_pid();
@@ -136,7 +136,7 @@ double* initial_vector(long N, long n)
 
     //generate and distribute sum to all processors
     double* u = vecallocd(n);
-    double sum = gen_rand_vec(n, u);
+    double sum = gen_rand_vec(n, u, seed);
     for (long t = 0; t < p; t++)
         bsp_put(t, &sum, sums, s*sizeof(double), sizeof(double));
     bsp_sync();
@@ -220,10 +220,13 @@ void bsp_pr()
     //Distribute the rows cyclically
     long n = nloc(p, s, N);
 
+    //Random seed
+    unsigned int seed = (unsigned int)(RAND_MAX*bsp_time()) ^ s;
+
     //Generation graph
     long* start; 
     start = vecalloci(n+1);
-    long* cols = gen_graph(N, n, start);
+    long* cols = gen_graph(N, n, start, &seed);
  
     //Outlinks
     bsp_sync();
@@ -231,11 +234,11 @@ void bsp_pr()
     uint8_t* D = outlinks_pr(N, n, cols, start);
     bsp_sync();
     if (s==0) {tg1 = bsp_time();}
-    
+
     if (N <= 10) print_graphs(n, D, start, cols);
     
     //Initial vector
-    double* u = initial_vector(N, n);
+    double* u = initial_vector(N, n, &seed);
 
     // Allocations
     double* Du = vecallocd(n);

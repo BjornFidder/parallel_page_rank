@@ -1,6 +1,16 @@
 
 #include "vec.h"
 
+int rand_r(unsigned *seedp) {
+    *seedp = *seedp * 1103515245 + 12345;
+    return((unsigned)(*seedp/65536) % 32768);
+}
+
+long rand_long(long N, unsigned int* seed) 
+{
+    return (long)rand_r(seed) % N;
+}
+
 void print_vec(long N, double* x) 
 {
     for (long i = 0; i < N; i++) 
@@ -8,7 +18,7 @@ void print_vec(long N, double* x)
     printf("\n");
 }
 
-void gen_rand_prob_vec(long N, double* u) 
+void gen_rand_prob_vec(long N, double* u, unsigned int* seed) 
 {
     //Generate a random stochastic vector by generating an array
     //of random integers, and then normalize by dividing by the sum
@@ -16,7 +26,7 @@ void gen_rand_prob_vec(long N, double* u)
     double sum = 0;
     for (long i = 0; i<N; i++)
     {
-        u[i] = (double)(rand() % (RAND_MAX / N));
+        u[i] = (double)rand_long(RAND_MAX/(N*10), seed);
         sum += u[i];
     }
     for (long i = 0; i<N; i++) 

@@ -76,7 +76,7 @@ void print_vecs(long N, double* u, double* r)
 
 }
 
-long solve_pr(long N, long* cols, long* start, uint8_t* D)
+long solve_pr(long N, long* cols, long* start, uint8_t* D, unsigned int* seed)
 {
     //solve the PageRank problem (I - pGD^{-1})u = e iteratively
     //N is the system size
@@ -85,7 +85,7 @@ long solve_pr(long N, long* cols, long* start, uint8_t* D)
 
     //initial vectors
     double* u = vecallocd(N);
-    gen_rand_prob_vec(N, u);
+    gen_rand_prob_vec(N, u, seed);
     
     double* r = comp_residual(N, cols, start, D, u);
     if (N <= 10) print_vecs(N, u, r);
@@ -119,9 +119,10 @@ int main(int argc, char **argv)
     clock0 = clock();
 
     /////////////////////////
+    unsigned int seed = (unsigned int)(RAND_MAX*clock0);
     long* start;
     start = vecalloci(N+1); 
-    long* cols = gen_graph(N, N, start);
+    long* cols = gen_graph(N, N, start, &seed);
     clock1 = clock();
     uint8_t* D  = outlinks(N, N, cols, start);
     
@@ -131,7 +132,7 @@ int main(int argc, char **argv)
         {print_graph(N, cols, start);
         print_D(N, D);}
 
-    long count = solve_pr(N, cols, start, D);
+    long count = solve_pr(N, cols, start, D, &seed);
 
     vecfreei(cols);
     vecfreei(start);
