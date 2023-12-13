@@ -1,0 +1,97 @@
+Please enter N:
+Running PageRank algorithm with N = 10000000
+Needed 133 iterations
+Generation run-time: 0.652848
+Finding outlinks: 0.123547
+Solving run-time: 54.674200
+Time per iteration: 0.411084
+Total run-time: 55.327048
+
+How many processors do you want to use?
+Using 1 processors
+Please enter N:
+Running PageRank algorithm for N = 10000000
+Expected 134.596988 iterations
+Needed 133 iterations
+Generation run-time: 0.866403
+Finding outlinks: 0.338632
+Solving run-time: 54.239727
+Time per iteration: 0.399783
+Total run-time: 55.106130
+
+How many processors do you want to use?
+Using 4 processors
+Please enter N:
+Running PageRank algorithm for N = 10000000
+Expected 134.596988 iterations
+Needed 133 iterations
+Generation run-time: 0.551034
+Finding outlinks: 0.417589
+Solving run-time: 56.326059
+Time per iteration: 0.418382
+Total run-time: 56.877093
+
+How many processors do you want to use?
+Using 8 processors
+Please enter N:
+Running PageRank algorithm for N = 10000000
+Expected 134.596988 iterations
+Needed 133 iterations
+Generation run-time: 0.526902
+Finding outlinks: 0.458770
+Solving run-time: 47.251836
+Time per iteration: 0.351273
+Total run-time: 47.778738
+
+How many processors do you want to use?
+Using 16 processors
+Please enter N:
+Running PageRank algorithm for N = 10000000
+Expected 134.596988 iterations
+Needed 133 iterations
+Generation run-time: 0.567592
+Finding outlinks: 0.531300
+Solving run-time: 31.757501
+Time per iteration: 0.235915
+Total run-time: 32.325093
+
+How many processors do you want to use?
+Using 32 processors
+Please enter N:
+Running PageRank algorithm for N = 10000000
+Expected 134.596988 iterations
+Needed 133 iterations
+Generation run-time: 0.646845
+Finding outlinks: 0.617086
+Solving run-time: 21.673353
+Time per iteration: 0.160197
+Total run-time: 22.320199
+
+How many processors do you want to use?
+Using 64 processors
+Please enter N:
+Running PageRank algorithm for N = 10000000
+Expected 134.596988 iterations
+Needed 133 iterations
+Generation run-time: 0.791468
+Finding outlinks: 0.768835
+Solving run-time: 20.406203
+Time per iteration: 0.150484
+Total run-time: 21.197671
+
+srun: error: Unable to create step for job 4640830: Job/step already completing or completed
+
+JOB STATISTICS
+==============
+Job ID: 4640830
+Cluster: snellius
+User/Group: scur0435/scur0435
+State: RUNNING
+Nodes: 1
+Cores per node: 128
+CPU Utilized: 00:32:16
+CPU Efficiency: 4.98% of 10:48:32 core-walltime
+Job Wall-clock time: 00:05:04
+Memory Utilized: 5.44 GB
+Memory Efficiency: 2.43% of 224.00 GB
+WARNING: Efficiency statistics may be misleading for RUNNING jobs.

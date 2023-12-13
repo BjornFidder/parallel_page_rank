@@ -1,0 +1,108 @@
+Please enter N:
+Running PageRank algorithm with N = 8000000
+Needed 132 iterations
+Generation run-time: 0.529720
+Finding outlinks: 0.104190
+Solving run-time: 42.605881
+Time per iteration: 0.322772
+Total run-time: 43.135601
+
+How many processors do you want to use?
+Using 1 processors
+Please enter N:
+Running PageRank algorithm for N = 8000000
+Expected 133.910472 iterations
+Needed 132 iterations
+Generation run-time: 0.698344
+Finding outlinks: 0.268677
+Solving run-time: 41.992067
+Time per iteration: 0.311711
+Total run-time: 42.690410
+
+How many processors do you want to use?
+Using 4 processors
+Please enter N:
+Running PageRank algorithm for N = 8000000
+Expected 133.910472 iterations
+Needed 132 iterations
+Generation run-time: 0.451470
+Finding outlinks: 0.342961
+Solving run-time: 44.562525
+Time per iteration: 0.333489
+Total run-time: 45.013995
+
+How many processors do you want to use?
+Using 8 processors
+Please enter N:
+Running PageRank algorithm for N = 8000000
+Expected 133.910472 iterations
+Needed 132 iterations
+Generation run-time: 0.440163
+Finding outlinks: 0.384707
+Solving run-time: 37.093889
+Time per iteration: 0.277842
+Total run-time: 37.534052
+
+How many processors do you want to use?
+Using 16 processors
+Please enter N:
+Running PageRank algorithm for N = 8000000
+Expected 133.910472 iterations
+Needed 132 iterations
+Generation run-time: 0.513545
+Finding outlinks: 0.482527
+Solving run-time: 24.967349
+Time per iteration: 0.186796
+Total run-time: 25.480894
+
+How many processors do you want to use?
+Using 32 processors
+Please enter N:
+Running PageRank algorithm for N = 8000000
+Expected 133.910472 iterations
+Needed 132 iterations
+Generation run-time: 0.584039
+Finding outlinks: 0.564202
+Solving run-time: 17.245169
+Time per iteration: 0.128336
+Total run-time: 17.829208
+
+How many processors do you want to use?
+Using 64 processors
+Please enter N:
+Running PageRank algorithm for N = 8000000
+Expected 133.910472 iterations
+Needed 132 iterations
+Generation run-time: 0.723718
+Finding outlinks: 0.703750
+Solving run-time: 16.381513
+Time per iteration: 0.121537
+Total run-time: 17.105230
+
+How many processors do you want to use?
+Using 128 processors
+Please enter N:
+Running PageRank algorithm for N = 8000000
+Expected 133.910472 iterations
+Needed 132 iterations
+Generation run-time: 1.888110
+Finding outlinks: 1.823449
+Solving run-time: 15.787920
+Time per iteration: 0.114007
+Total run-time: 17.676030
+
+
+JOB STATISTICS
+==============
+Job ID: 4640410
+Cluster: snellius
+User/Group: scur0435/scur0435
+State: RUNNING
+Nodes: 1
+Cores per node: 128
+CPU Utilized: 00:43:08
+CPU Efficiency: 7.75% of 09:16:48 core-walltime
+Job Wall-clock time: 00:04:21
+Memory Utilized: 3.09 GB
+Memory Efficiency: 1.38% of 224.00 GB
+WARNING: Efficiency statistics may be misleading for RUNNING jobs.
