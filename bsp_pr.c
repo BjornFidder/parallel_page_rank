@@ -88,7 +88,6 @@ uint8_t* outlinks_pr(long N, long n, long* cols, long* start)
     long p = bsp_nprocs();
     long s = bsp_pid();
 
-    
     long t;
     for (long k = 0; k < start[n]; k++)
     {
