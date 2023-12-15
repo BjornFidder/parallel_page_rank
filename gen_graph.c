@@ -74,10 +74,10 @@ void print_graph(long N, long* cols, long* start)
     printf("\n");
 }
 
-void print_D(long N, uint8_t* D) 
+void print_D(long n, uint8_t* D) 
 {
    printf("D[i]:\n");
-    for (long i = 0; i < N; i++)
+    for (long i = 0; i < n; i++)
         printf("%d ", D[i]);
     printf("\n"); 
 }
