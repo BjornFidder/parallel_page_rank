@@ -132,8 +132,9 @@ int main(int argc, char **argv)
         {print_graph(N, cols, start);
         print_D(N, D);}
 
-    long count = solve_pr(N, cols, start, D, &seed);
-
+    //long count = solve_pr(N, cols, start, D, &seed);  
+    long count = 0;
+    
     vecfreei(cols);
     vecfreei(start);
     vecfreei8(D);

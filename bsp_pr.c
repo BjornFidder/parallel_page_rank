@@ -82,43 +82,79 @@ void print_vecs_pr(long n, double* u, double* r, bool print)
     } 
 }
 
-
-uint8_t* outlinks_pr(long N, long n, long* cols, long* start)
+uint8_t* outlinks_pr_send(long N, long n, long* cols, long* start)
 {
     long p = bsp_nprocs();
     long s = bsp_pid();
 
-    long t;
+    uint8_t* D = vecalloci8(n);
+    initi8(n, D, 0);
+
+    long t; long j;
     for (long k = 0; k < start[n]; k++)
     {
         t = cols[k]%p; //target processor
-        if (t != s) bsp_send(t, NULL, &cols[k], sizeof(long));
+        j = cols[k]/p; //local column index
+        if (t != s) bsp_send(t, NULL, &j, sizeof(long));
+        else D[j]++;
     }
 
     bsp_sync();
     bsp_nprocs_t m; //number of received messages
     bsp_qsize(&m, NULL);
+    printf("s = %ld, m = %d\n", s, m);
 
-    long* outlinks_get = vecalloci(m);
-    for (int i = 0; i<m; i++)
-        bsp_move(&outlinks_get[i], sizeof(long));
+    for (int i = 0; i<m; i++) 
+    {
+        bsp_move(&j, sizeof(long));
+        D[j]++;
+    }
 
-    uint8_t* D = vecalloci8(n);
-    initi8(n, D, 0);
-    
-    //outlinks from local rows
-    for (int k = 0; k < start[n]; k++)
-        if (cols[k]%p==s) D[cols[k]/p]++;
+    outlinks_noZeroes(n, D);
 
-    //outlinks from other processors
-    for (int i = 0; i < m; i++)
-        D[outlinks_get[i]/p]++;
-
-    free(outlinks_get);
     return D;
 }
+uint8_t* outlinks_pr_long(long N, long n, long* cols, long* start) 
+{
+    long p = bsp_nprocs();
+    long s = bsp_pid();
+    
+    //compute local outlinks
+    long* ds = vecalloci(n*p);
+    initi(n*p,ds,0);
+    bsp_push_reg(ds, n*p*sizeof(long));
+    bsp_sync();
+    
+    uint8_t* d = outlinks(N, n, cols, start); //local outlinks
 
-uint8_t* outlinks_pr_slow(long N, long n, long* cols, long* start) 
+    //broadcast local outlinks
+    long t; long x;
+    for (long j = 0; j < N; j++)
+    {
+        t = j%p;
+        x = (long)d[j];
+        if (s != t && x > 0) 
+            bsp_put(t, &x, ds, (j/p + s*n)*sizeof(long), sizeof(long));
+        else
+            ds[j/p+s*n] = x;
+    }
+    vecfreei8(d);
+    bsp_sync();
+    
+    //compute total outlinks for local rows
+    uint8_t* D = vecalloci8(n);
+    initi8(n, D, 0);
+    for (long i = 0; i < n; i++) 
+        for (long t = 0; t < p; t++)
+            D[i] += (uint8_t)ds[i+n*t];
+    
+    outlinks_noZeroes(n, D);
+    bsp_pop_reg(ds);
+    vecfreei(ds);
+
+    return D;
+}
+uint8_t* outlinks_pr(long N, long n, long* cols, long* start) 
 {   
     long p = bsp_nprocs();
     long s = bsp_pid();
@@ -131,19 +167,19 @@ uint8_t* outlinks_pr_slow(long N, long n, long* cols, long* start)
     
     uint8_t* d = outlinks(N, n, cols, start); //local outlinks
 
-    // 'put' local outlinks in local ds
-    for (long j = 0; j < N; j++)
-        if (j%p == s) ds[j/p+s*n] = d[j];
-
+    long hs = 0;
     //broadcast local outlinks
     long t;
     for (long j = 0; j < N; j++)
     {
         t = j%p;
         if (t != s && d[j] > 0) 
-            bsp_put(t, &d[j], ds, (j/p + s*n)*sizeof(uint8_t), sizeof(uint8_t));
+            {bsp_put(t, &d[j], ds, (j/p + s*n)*sizeof(uint8_t), sizeof(uint8_t)); hs++;}
+        else
+            ds[j/p+s*n] = d[j];
     }
-    free(d);
+    printf("s = %ld, hs = %ld\n", s, hs);
+    vecfreei8(d);
     bsp_sync();
     
     //compute total outlinks for local rows
@@ -152,10 +188,16 @@ uint8_t* outlinks_pr_slow(long N, long n, long* cols, long* start)
     for (long i = 0; i < n; i++) 
         for (long t = 0; t < p; t++)
             D[i] += ds[i+n*t];
+    
+    long hr = 0;
+    for (long i = 0; i < n; i++) 
+        for (long t = 0; t < p; t++)
+            if (ds[i+n*t]>0) hr++;
+    printf("s = %ld, hr = %ld\n", s, hr);
 
     outlinks_noZeroes(n, D);
     bsp_pop_reg(ds);
-    free(ds);
+    vecfreei8(ds);
 
     return D;
 }
@@ -190,7 +232,6 @@ double* initial_vector(long N, long n, unsigned int* seed)
 
     return u;
 }
-
 
 void mul_GD(long N, long n, double* u, uint8_t* D, long* start, long* cols, bool* cols_get, double* Du, double* Du_glob, double* v) 
 {
@@ -333,8 +374,8 @@ void bsp_pr()
     if (s==0 && iterate) {
         printf("Solving run-time: %f\n", ts1 - tg1);
         printf("Time per iteration: %f\n", (ts1 - ts0) / count);
-        printf("Total run-time: %f\n", (ts1 - tg0));
-        printf("\n");}
+        printf("Total run-time: %f\n", (ts1 - tg0));}
+    if (s==0) printf("\n");
 }
 
 int main(int argc, char **argv) 
