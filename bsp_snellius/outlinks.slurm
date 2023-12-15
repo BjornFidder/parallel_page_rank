@@ -4,7 +4,7 @@
 #SBATCH --output=outlinks.out
 ##SBATCH -t 00:02:00
 
-for n in 1 2 3 4 5 6 7 8 9 10
+for n in 1
 do
     for p in 1 4 8 16 32 64 128
     do
