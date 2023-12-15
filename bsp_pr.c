@@ -102,7 +102,7 @@ uint8_t* outlinks_pr_send(long N, long n, long* cols, long* start)
     bsp_sync();
     bsp_nprocs_t m; //number of received messages
     bsp_qsize(&m, NULL);
-    printf("s = %ld, m = %d\n", s, m);
+    //printf("s = %ld, m = %d\n", s, m);
 
     for (int i = 0; i<m; i++) 
     {
@@ -167,18 +167,18 @@ uint8_t* outlinks_pr(long N, long n, long* cols, long* start)
     
     uint8_t* d = outlinks(N, n, cols, start); //local outlinks
 
-    long hs = 0;
+    //long hs = 0;
     //broadcast local outlinks
     long t;
     for (long j = 0; j < N; j++)
     {
         t = j%p;
         if (t != s && d[j] > 0) 
-            {bsp_put(t, &d[j], ds, (j/p + s*n)*sizeof(uint8_t), sizeof(uint8_t)); hs++;}
+            bsp_put(t, &d[j], ds, (j/p + s*n)*sizeof(uint8_t), sizeof(uint8_t)); //hs++;}
         else
             ds[j/p+s*n] = d[j];
     }
-    printf("s = %ld, hs = %ld\n", s, hs);
+    //printf("s = %ld, hs = %ld\n", s, hs);
     vecfreei8(d);
     bsp_sync();
     
@@ -189,11 +189,11 @@ uint8_t* outlinks_pr(long N, long n, long* cols, long* start)
         for (long t = 0; t < p; t++)
             D[i] += ds[i+n*t];
     
-    long hr = 0;
-    for (long i = 0; i < n; i++) 
-        for (long t = 0; t < p; t++)
-            if (ds[i+n*t]>0) hr++;
-    printf("s = %ld, hr = %ld\n", s, hr);
+    // long hr = 0;
+    // for (long i = 0; i < n; i++) 
+    //     for (long t = 0; t < p; t++)
+    //         if (ds[i+n*t]>0) hr++;
+    // printf("s = %ld, hr = %ld\n", s, hr);
 
     outlinks_noZeroes(n, D);
     bsp_pop_reg(ds);
@@ -300,7 +300,7 @@ void bsp_pr()
     //Outlinks
     bsp_sync();
     if (s==0) tD0 = bsp_time(); 
-    uint8_t* D = outlinks_pr(N, n, cols, start);
+    uint8_t* D = outlinks_pr_send(N, n, cols, start);
     bsp_sync();
     if (s==0) tg1 = bsp_time();
 
