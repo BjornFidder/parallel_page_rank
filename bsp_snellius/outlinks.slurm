@@ -6,6 +6,7 @@
 
 for n in 1
 do
+    N=$((n*1000000))
     for p in 1 4 8 16 32 64 128
     do
         # number of processor cores to use
