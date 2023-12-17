@@ -13,7 +13,7 @@ seq: $(OBJGEN)
 bsp: $(OBJGEN)
 	bspcc $(CFLAGS) -o bsp_pr $(OBJBSP) $(LFLAGS)
 
-bench: $(OBJBEN)
+ben: $(OBJBEN)
 	bspcc $(CFLAGS) -o bench $(OBJBEN) $(LFLAGS)
 
-all: seq bsp bench
+all: seq bsp ben
