@@ -127,6 +127,7 @@ uint8_t* outlinks_pr_long(long N, long n, long* cols, long* start)
     
     uint8_t* d = outlinks(N, n, cols, start); //local outlinks
 
+    //long hs = 0;
     //broadcast local outlinks
     long t; long x;
     for (long j = 0; j < N; j++)
@@ -134,10 +135,11 @@ uint8_t* outlinks_pr_long(long N, long n, long* cols, long* start)
         t = j%p;
         x = (long)d[j];
         if (s != t && x > 0) 
-            bsp_put(t, &x, ds, (j/p + s*n)*sizeof(long), sizeof(long));
+            bsp_put(t, &x, ds, (j/p + s*n)*sizeof(long), sizeof(long)); //hs++;}
         else
             ds[j/p+s*n] = x;
     }
+    //printf("s = %ld, hs = %ld\n", s, hs);
     vecfreei8(d);
     bsp_sync();
     
@@ -148,6 +150,12 @@ uint8_t* outlinks_pr_long(long N, long n, long* cols, long* start)
         for (long t = 0; t < p; t++)
             D[i] += (uint8_t)ds[i+n*t];
     
+    // long hr = 0;
+    // for (long i = 0; i < n; i++) 
+    //     for (long t = 0; t < p; t++)
+    //         if (ds[i+n*t]>0) hr++;
+    // printf("s = %ld, hr = %ld\n", s, hr);
+
     outlinks_noZeroes(n, D);
     bsp_pop_reg(ds);
     vecfreei(ds);
@@ -167,18 +175,16 @@ uint8_t* outlinks_pr(long N, long n, long* cols, long* start)
     
     uint8_t* d = outlinks(N, n, cols, start); //local outlinks
 
-    //long hs = 0;
-    //broadcast local outlinks
+    //send local outlinks to processor that owns the column
     long t;
     for (long j = 0; j < N; j++)
     {
         t = j%p;
         if (t != s && d[j] > 0) 
-            bsp_put(t, &d[j], ds, (j/p + s*n)*sizeof(uint8_t), sizeof(uint8_t)); //hs++;}
+            bsp_put(t, &d[j], ds, (j/p + s*n)*sizeof(uint8_t), sizeof(uint8_t)); 
         else
             ds[j/p+s*n] = d[j];
     }
-    //printf("s = %ld, hs = %ld\n", s, hs);
     vecfreei8(d);
     bsp_sync();
     
@@ -188,12 +194,6 @@ uint8_t* outlinks_pr(long N, long n, long* cols, long* start)
     for (long i = 0; i < n; i++) 
         for (long t = 0; t < p; t++)
             D[i] += ds[i+n*t];
-    
-    // long hr = 0;
-    // for (long i = 0; i < n; i++) 
-    //     for (long t = 0; t < p; t++)
-    //         if (ds[i+n*t]>0) hr++;
-    // printf("s = %ld, hr = %ld\n", s, hr);
 
     outlinks_noZeroes(n, D);
     bsp_pop_reg(ds);

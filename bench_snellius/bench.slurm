@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=128
+#SBATCH --output=bench1.out
 ##SBATCH -t 00:10:00
 
 P=1
