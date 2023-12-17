@@ -126,7 +126,7 @@ void bspbench(){
     for (long h=0; h<=MAXH; h++){
         /* Initialize communication pattern */
         for (long i=0; i<h; i++){
-            src[i]= (double)i;
+            dest[i] = (double)i;
             if (p==1){
                 destproc[i]= 0;
                 destindex[i]= i;
@@ -146,7 +146,7 @@ void bspbench(){
                 // bsp_put(destproc[i],&src[i],dest,
                 //         destindex[i]*sizeof(double),
                 //         sizeof(double));
-                bsp_get(destproc[i], &dest, 
+                bsp_get(destproc[i], dest, 
                         destindex[i]*sizeof(double), 
                         &src[i], sizeof(double));
             bsp_sync(); 
