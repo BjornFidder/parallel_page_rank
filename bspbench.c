@@ -143,9 +143,12 @@ void bspbench(){
         double time0= bsp_time(); 
         for (long iter=0; iter<NITERS; iter++){
             for (long i=0; i<h; i++)
-                bsp_put(destproc[i],&src[i],dest,
-                        destindex[i]*sizeof(double),
-                        sizeof(double));
+                // bsp_put(destproc[i],&src[i],dest,
+                //         destindex[i]*sizeof(double),
+                //         sizeof(double));
+                bsp_get(destproc[i], &dest, 
+                        destindex[i]*sizeof(double), 
+                        &src[i], sizeof(double));
             bsp_sync(); 
         }
         double time1= bsp_time();
