@@ -1,0 +1,36 @@
+Please enter N:
+Running PageRank algorithm with N = 8000000
+Needed 132 iterations
+Generation run-time: 0.525555
+Finding outlinks: 0.097762
+Solving run-time: 42.319796
+Time per iteration: 0.320605
+Total run-time: 42.845351
+
+How many processors do you want to use?
+Using 128 processors
+Please enter N:
+Running PageRank algorithm for N = 8000000
+Expected 133.910472 iterations
+Needed 132 iterations
+Generation run-time: 0.864740
+Finding outlinks: 0.845858
+Solving run-time: 13.289795
+Time per iteration: 0.097998
+Total run-time: 14.154535
+
+
+JOB STATISTICS
+==============
+Job ID: 4645509
+Cluster: snellius
+User/Group: scur0435/scur0435
+State: RUNNING
+Nodes: 1
+Cores per node: 128
+CPU Utilized: 00:00:43
+CPU Efficiency: 0.49% of 02:25:04 core-walltime
+Job Wall-clock time: 00:01:08
+Memory Utilized: 608.54 MB
+Memory Efficiency: 0.27% of 224.00 GB
+WARNING: Efficiency statistics may be misleading for RUNNING jobs.
