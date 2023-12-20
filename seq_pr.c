@@ -55,6 +55,11 @@ void print_vecs(long N, double* u, double* r)
     for (long i = 0; i < N; i++) sum += u[i];
     printf("sum: %f\n", sum);
 
+    if (N<=10) {
+    printf("u normalized: ");
+    for (long i = 0; i < N; i++) printf("%f ", u[i]/sum);
+    printf("\n");}
+
     bool prob_vec = true;
     for (long i = 0; i < N; i++) if (u[i] < 0) prob_vec = false;
     if (!prob_vec) printf("Not a probability vector!\n");
@@ -110,10 +115,10 @@ int main(int argc, char **argv)
     /////////////////////////
     unsigned int seed = (unsigned int)(RAND_MAX*clock0);
     long* start;
-    start = vecalloci(N+1); 
-    long* cols = gen_graph(N, N, start, &seed);
-    clock1 = clock();
-    uint8_t* D  = outlinks(N, N, cols, start);
+
+    // long* cols = gen_graph(N, N, start, &seed);
+    // clock1 = clock();
+    // uint8_t* D  = outlinks(N, N, cols, start);
     
     clock2 = clock();
 
@@ -141,3 +146,32 @@ int main(int argc, char **argv)
     printf("Total run-time: %f\n", total_time);
     printf("\n");
 }
+
+//test graph
+// start = vecalloci(N+1); 
+// start[0] = 0;
+// start[1] = 2;
+// start[2] = 3;
+// start[3] = 4;
+// start[4] = 6;
+// start[5] = 7;
+// start[6] = 9;
+
+// long* cols = vecalloci(10);
+// cols[0] = 3;
+// cols[1] = 5;
+// cols[2] = 0;
+// cols[3] = 1;
+// cols[4] = 1;
+// cols[5] = 2;
+// cols[6] = 2;
+// cols[7] = 0;
+// cols[8] = 2;
+
+// uint8_t* D = vecalloci8(N);
+// D[0] = 2;
+// D[1] = 2;
+// D[2] = 3;
+// D[3] = 1;
+// D[4] = 1;
+// D[5] = 1;
