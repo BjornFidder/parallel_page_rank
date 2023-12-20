@@ -2,7 +2,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=128
 #SBATCH --output=put.out
-##SBATCH -t 00:10:00
+#SBATCH -t 00:10:00
 
 for P in 1 2 4 8 16 32 64 128 
 do

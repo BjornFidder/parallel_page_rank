@@ -35,7 +35,7 @@ double gen_rand_vec(long N, long n, double* u, unsigned int* seed)
     return sum;
 }
 
-void div_vec_pr(long n, double* x, uint8_t* y, double* z) 
+void div_vec_bsp(long n, double* x, uint8_t* y, double* z) 
 {
     //divide vector x by vector y
     //giving the output in vector z
@@ -46,6 +46,9 @@ void div_vec_pr(long n, double* x, uint8_t* y, double* z)
 
 void print_graphs(long n, uint8_t* D, long* start, long* cols)
 {
+    //Print the graphs G and D, for testing purposes
+    //This function is automatically called for N <= 20
+
     long p = bsp_nprocs();
     long s = bsp_pid();
 
@@ -61,7 +64,7 @@ void print_graphs(long n, uint8_t* D, long* start, long* cols)
     }
     
 }
-void print_vecs_pr(long n, double* u, double* r, bool print) 
+void print_vecs_bsp(long n, double* u, double* r, bool print) 
 {
     long p = bsp_nprocs();
     long s = bsp_pid();
@@ -82,8 +85,9 @@ void print_vecs_pr(long n, double* u, double* r, bool print)
     } 
 }
 
-uint8_t* outlinks_pr_send(long N, long n, long* cols, long* start)
+uint8_t* outlinks_bsp_send(long N, long n, long* cols, long* start)
 {
+    //Alternative implementation of the outlinks function, using the bsp_send primitive
     long p = bsp_nprocs();
     long s = bsp_pid();
 
@@ -114,8 +118,12 @@ uint8_t* outlinks_pr_send(long N, long n, long* cols, long* start)
 
     return D;
 }
-uint8_t* outlinks_pr_long(long N, long n, long* cols, long* start) 
+uint8_t* outlinks_bsp_long(long N, long n, long* cols, long* start) 
 {
+    //Equivalent implementation of the outlinks function, but now sending long values
+    //instead of uint8. For testing purposes
+
+
     long p = bsp_nprocs();
     long s = bsp_pid();
     
@@ -162,7 +170,7 @@ uint8_t* outlinks_pr_long(long N, long n, long* cols, long* start)
 
     return D;
 }
-uint8_t* outlinks_pr(long N, long n, long* cols, long* start) 
+uint8_t* outlinks_bsp(long N, long n, long* cols, long* start) 
 {   
     long p = bsp_nprocs();
     long s = bsp_pid();
@@ -204,6 +212,8 @@ uint8_t* outlinks_pr(long N, long n, long* cols, long* start)
 
 double* initial_vector(long N, long n, unsigned int* seed) 
 {
+    //Output: a random stochastic vector to start the iteration process
+
     long p = bsp_nprocs();
     long s = bsp_pid();
     
@@ -236,19 +246,20 @@ double* initial_vector(long N, long n, unsigned int* seed)
 void mul_GD(long N, long n, double* u, uint8_t* D, long* start, long* cols, bool* cols_get, double* Du, double* Du_glob, double* v) 
 {
     //compute v = G*Dinv*u in parallel
+
     long p = bsp_nprocs();
     long s = bsp_pid();
 
     initd(n, v, 0);
-    div_vec_pr(n, u, D, Du);
+    div_vec_bsp(n, u, D, Du);
 
     bsp_sync();
 
-    // // 'Get' values from this processor
+    // 'Get' values from this processor
     for (long i = 0; i < n; i++)
         Du_glob[i*p+s] = Du[i];
 
-    // //Determine which components of v to get from other processors
+    // Determine which components of v to get from other processors
     for (long j = 0; j < N; j++)
         if (cols_get[j]) bsp_get(j % p, Du, j/p * sizeof(double), &Du_glob[j], sizeof(double));
     bsp_sync();
@@ -258,7 +269,7 @@ void mul_GD(long N, long n, double* u, uint8_t* D, long* start, long* cols, bool
             v[i] += Du_glob[cols[k]];
 }
 
-void bsp_pr() 
+void bsp_bsp() 
 {
     bsp_begin(P);
     long p = bsp_nprocs();
@@ -300,7 +311,7 @@ void bsp_pr()
     //Outlinks
     bsp_sync();
     if (s==0) tD0 = bsp_time(); 
-    uint8_t* D = outlinks_pr_send(N, n, cols, start);
+    uint8_t* D = outlinks_bsp_send(N, n, cols, start);
     bsp_sync();
     if (s==0) tg1 = bsp_time();
 
@@ -335,7 +346,7 @@ void bsp_pr()
     bsp_sync();
     vecfreed(GDu);
 
-    // print_vecs_pr(n, u, r, n <= 10);
+    // print_vecs_bsp(n, u, r, n <= 10);
     //Iterate
     if (s==0) {ts0 = bsp_time();}
     double* GDr = vecallocd(n);
@@ -367,7 +378,7 @@ void bsp_pr()
     //////////////////////////////////
     
     if (s == 0 && iterate) printf("Needed %ld iterations\n", count);
-    //print_vecs_pr(n, u, r, n <= 10);   
+    //print_vecs_bsp(n, u, r, n <= 10);   
 
     if (s == 0) {printf("Generation run-time: %f\n", tg1-tg0);
         printf("Finding outlinks: %f\n", tg1-tD0);}
@@ -380,7 +391,7 @@ void bsp_pr()
 
 int main(int argc, char **argv) 
 {
-    bsp_init(bsp_pr, argc, argv);
+    bsp_init(bsp_bsp, argc, argv);
 
     /* Sequential part */
     printf("How many processors do you want to use?\n");
@@ -393,7 +404,7 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
     printf("Using %ld processors\n", P);
-    bsp_pr();
+    bsp_bsp();
     
     exit(EXIT_SUCCESS); 
 }

@@ -45,12 +45,17 @@ long* gen_graph(long N, long n, long* start, unsigned int* seed)
 
 void outlinks_noZeroes(long n, uint8_t* D) 
 {
+    //Set the number of outlinks for dangling nodes to 1,
+    //to avoid division by 0.
     for (long i = 0; i < n; i++) 
         if (D[i] == 0) D[i] = 1;
 }
 
 uint8_t* outlinks(long N, long n, long* cols, long* start) 
 { 
+    //Determine the number of outlinks to each node 1 <= i < N, 
+    //which is the number of elements in column i, in the n given rows.
+    //Used both in sequential and parallel programs.
     uint8_t* D = vecalloci8(N);
     initi8(N, D, 0);
     for (long k = 0; k < start[n]; k++) 
@@ -60,6 +65,7 @@ uint8_t* outlinks(long N, long n, long* cols, long* start)
 
 void print_graph(long N, long* cols, long* start) 
 {
+    //Print the graph G, for testing purposes.
     printf("start[i]:\n");
     for (long i = 0; i <= N; i++)
         printf("%ld ", start[i]);
@@ -76,6 +82,7 @@ void print_graph(long N, long* cols, long* start)
 
 void print_D(long n, uint8_t* D) 
 {
+   //Print the graph D, for testing purposes
    printf("D[i]:\n");
     for (long i = 0; i < n; i++)
         printf("%d ", D[i]);

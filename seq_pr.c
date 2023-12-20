@@ -33,6 +33,7 @@ double* comp_residual(long N, long* cols, long* start, uint8_t* D, double* u)
 
 void iterate(long N, long* cols, long* start, uint8_t* D, double* u, double* r)
 {
+    //Perform one iteration of the PageRank algorithm
     add_vec(N, u, r);
     double* Dr = div_vec(N, r, D);
     double* GDr = mul_mat_vec(N, cols, start, Dr);
@@ -41,22 +42,11 @@ void iterate(long N, long* cols, long* start, uint8_t* D, double* u, double* r)
     vecfreed(GDr);
 }
 
-// void test_u(long N, long* cols, long* start, uint8_t* D, double* u) 
-// {
-//     double* e = vecallocd(N);
-
-//     double* Du = div_vec(N, u, D);
-//     double* GDu = mul_mat_vec(N, cols, start, Du);
-//     vecfreed(Du);
-//     for (long i = 0; i < N; i++) 
-//         e[i] = u[i] - p*GDu[i];
-//     vecfreed(GDu);
-//     printf("e: ");
-//     print_vec(N, e);
-//     vecfreed(e);
-// }
 void print_vecs(long N, double* u, double* r)
 {
+    //Print vectors u and r of size N, and their L1/L2 norm
+    //we only print the components if N<=10.
+
     if (N<=10) {
     printf("u: ");
     print_vec(N, u);
@@ -80,7 +70,7 @@ long solve_pr(long N, long* cols, long* start, uint8_t* D, unsigned int* seed)
 {
     //solve the PageRank problem (I - pGD^{-1})u = e iteratively
     //N is the system size
-    //G is given in CRS format by cols and D
+    //G is given in CRS format by start and cols
     //D is given as an array containing the diagonal elements
 
     //initial vectors
@@ -96,7 +86,6 @@ long solve_pr(long N, long* cols, long* start, uint8_t* D, unsigned int* seed)
         iterate(N, cols, start, D, u, r);
         count++;
     }
-    //printf("after %ld iterations: \n", count);
     if (N <= 10) print_vecs(N, u, r);
     vecfreed(u);
     vecfreed(r);
@@ -132,8 +121,7 @@ int main(int argc, char **argv)
         {print_graph(N, cols, start);
         print_D(N, D);}
 
-    //long count = solve_pr(N, cols, start, D, &seed);  
-    long count = 0;
+    long count = solve_pr(N, cols, start, D, &seed);
     
     vecfreei(cols);
     vecfreei(start);
