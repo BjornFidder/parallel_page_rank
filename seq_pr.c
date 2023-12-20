@@ -116,9 +116,9 @@ int main(int argc, char **argv)
     unsigned int seed = (unsigned int)(RAND_MAX*clock0);
     long* start;
 
-    // long* cols = gen_graph(N, N, start, &seed);
-    // clock1 = clock();
-    // uint8_t* D  = outlinks(N, N, cols, start);
+    long* cols = gen_graph(N, N, start, &seed);
+    clock1 = clock();
+    uint8_t* D  = outlinks(N, N, cols, start);
     
     clock2 = clock();
 
